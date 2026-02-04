@@ -1,0 +1,30 @@
+meta {
+  name: Regitrar usuario
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{host}}/auth/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "{{name}}",
+    "email": "{{email}}",
+    "password": "{{password}}"
+  }
+}
+
+vars:pre-request {
+  name: Brian
+  email: brian@api.com
+  password: pass
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

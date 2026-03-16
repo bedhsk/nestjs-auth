@@ -5,10 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { EncoderService } from 'src/auth/encoder.service';
 
@@ -33,9 +31,15 @@ export class UsersService {
 
     try {
       return await this.usersRepository.save(user);
-    } catch (e) {
-      if (e.code === '23505') {
-        throw new ConflictException('Email already exists');
+    } catch (e: unknown) {
+      if (e instanceof QueryFailedError) {
+        const driverError = e.driverError as {
+          code?: string;
+          detail?: string;
+        };
+        if (driverError.code === '23505') {
+          throw new ConflictException('Email already exists');
+        }
       }
       throw new InternalServerErrorException();
     }
@@ -66,17 +70,5 @@ export class UsersService {
     }
 
     return user;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 }

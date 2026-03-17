@@ -7,9 +7,14 @@ meta {
 get {
   url: {{host}}/users
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMyMjJjYjA5LWEyYTgtNGI3ZC04M2UyLTg3YTA1ZjhlZWE5NSIsImVtYWlsIjoiYnJpYW5AYXBpLmNvbSIsImFjdGl2ZSI6ZmFsc2UsImlhdCI6MTc3MzczMjU0MiwiZXhwIjoxNzczNzM5NzQyfQ.Ka1yEd1sWSrxIWVS1fCmQFpN_MCj9boE2_DfTMTPiiQ
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

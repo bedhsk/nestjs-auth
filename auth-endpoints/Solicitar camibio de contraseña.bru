@@ -1,0 +1,22 @@
+meta {
+  name: Solicitar camibio de contraseña
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{host}}/auth/request-reset-password
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "brian@api.com"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

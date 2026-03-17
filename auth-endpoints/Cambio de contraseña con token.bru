@@ -1,0 +1,28 @@
+meta {
+  name: Cambio de contraseña con token
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{host}}/auth/reset-password
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "resetPasswordToken": "{{token}}",
+    "newPassword": "{{password}}"
+  }
+}
+
+vars:pre-request {
+  token: 0265732f-15f5-4cde-94bf-6e074e37db40
+  password: aleluya
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

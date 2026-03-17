@@ -1,0 +1,21 @@
+meta {
+  name: Activar usuario
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{host}}/auth/activate-account?id=c222cb09-a2a8-4b7d-83e2-87a05f8eea95&code=0bcc13c1-b70a-4ee3-9150-08df87668bd1
+  body: none
+  auth: inherit
+}
+
+params:query {
+  id: c222cb09-a2a8-4b7d-83e2-87a05f8eea95
+  code: 0bcc13c1-b70a-4ee3-9150-08df87668bd1
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

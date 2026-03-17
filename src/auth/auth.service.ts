@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   UnauthorizedException,
   UnprocessableEntityException,
@@ -13,6 +14,8 @@ import { LoginDto } from './dto/login.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtPayload } from './jwt-payload.interface';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -74,5 +77,15 @@ export class AuthService {
     user.password = await this.encoderService.encodePassword(newPassword);
     user.resetPasswordToken = null;
     this.usersService.update(user);
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto, user: User) {
+    const { oldPassword, newPassword } = changePasswordDto;
+    if (await this.encoderService.checkPassword(oldPassword, user.password)) {
+      user.password = await this.encoderService.encodePassword(newPassword);
+      this.usersService.update(user);
+    } else {
+      throw new BadRequestException('Old password is incorrect');
+    }
   }
 }

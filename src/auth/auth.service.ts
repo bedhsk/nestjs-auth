@@ -13,7 +13,7 @@ import { ActivateUserDto } from './dto/activate-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { JwtPayload } from './jwt-payload.interface';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { User } from 'src/users/entities/user.entity';
 

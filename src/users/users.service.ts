@@ -40,6 +40,10 @@ export class UsersService {
     }
   }
 
+  async update(user: User) {
+    await this.usersRepository.save(user);
+  }
+
   findAll() {
     return `This action returns all users`;
   }
@@ -67,14 +71,26 @@ export class UsersService {
     return user;
   }
 
+  async findOneInactiveByActivationToken(id: string, code: string) {
+    return await this.usersRepository.findOne({
+      where: { id, activationToken: code, isActive: false },
+    });
+  }
+
   async activateUser(user: User) {
     user.isActive = true;
     await this.usersRepository.save(user);
   }
 
-  async findOneInactiveByActivationToken(id: string, code: string) {
-    return await this.usersRepository.findOne({
-      where: { id, activationToken: code, isActive: false },
-    });  
+  async findOneByResetPasswordToken(resetPasswordToken: string) {
+    const user = await this.usersRepository.findOne({
+      where: { resetPasswordToken },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 }

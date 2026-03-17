@@ -8,9 +8,11 @@ import { EncoderService } from 'src/auth/encoder.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
-import { LoginDto } from './dto/login.dto';
-import { JwtPayload } from './jwt-payload.interface';
 import { ActivateUserDto } from './dto/activate-user.dto';
+import { LoginDto } from './dto/login.dto';
+import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { JwtPayload } from './jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -54,5 +56,23 @@ export class AuthService {
     }
 
     await this.usersService.activateUser(user);
+  }
+
+  async resetPasswordRequest(requestPasswordDto: RequestResetPasswordDto) {
+    const { email } = requestPasswordDto;
+    const user = await this.usersService.findOneByEmail(email);
+    user.resetPasswordToken = v4();
+    this.usersService.update(user);
+    // Send email (e.g. Dispatch an event so MailerModule can send the email)
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { resetPasswordToken, newPassword } = resetPasswordDto;
+    const user =
+      await this.usersService.findOneByResetPasswordToken(resetPasswordToken);
+
+    user.password = await this.encoderService.encodePassword(newPassword);
+    user.resetPasswordToken = null;
+    this.usersService.update(user);
   }
 }

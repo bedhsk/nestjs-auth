@@ -61,10 +61,13 @@ export class AuthService {
 
   async resetPasswordRequest(requestPasswordDto: RequestResetPasswordDto) {
     const { email } = requestPasswordDto;
-    const user = await this.usersService.findOneByEmail(email);
-    user.resetPasswordToken = v4();
-    await this.usersService.update(user);
-    // Send email (e.g. Dispatch an event so MailerModule can send the email)
+    const user = await this.usersService.findOneByEmailOrNull(email);
+    if (user) {
+      user.resetPasswordToken = v4();
+      await this.usersService.update(user);
+      // Send email (e.g. Dispatch an event so MailerModule can send the email)
+    }
+    return { message: 'If the email exists, a reset link has been sent.' };
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {

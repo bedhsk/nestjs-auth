@@ -58,6 +58,10 @@ export class UsersService {
     return user;
   }
 
+  async findOneByEmailOrNull(email: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({ email });
+  }
+
   async findOneByEmailWithPassword(email: string) {
     const user = await this.usersRepository.findOne({
       where: { email },

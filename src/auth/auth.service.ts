@@ -10,12 +10,11 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
 import { ActivateUserDto } from './dto/activate-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestResetPasswordDto } from './dto/request-reset-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +22,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly encoderService: EncoderService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async registerUser(registerUserDto: CreateUserDto): Promise<void> {
     const { name, email, password } = registerUserDto;
@@ -34,6 +33,9 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
     const { email, password } = loginDto;
     const user = await this.usersService.findOneByEmailWithPassword(email);
+    if (!user.isActive) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
     if (await this.encoderService.checkPassword(password, user.password)) {
       const payload: JwtPayload = { id: user.id, email, active: user.isActive };
       const accessToken = this.jwtService.sign(payload);
@@ -61,7 +63,7 @@ export class AuthService {
     const { email } = requestPasswordDto;
     const user = await this.usersService.findOneByEmail(email);
     user.resetPasswordToken = v4();
-    this.usersService.update(user);
+    await this.usersService.update(user);
     // Send email (e.g. Dispatch an event so MailerModule can send the email)
   }
 
@@ -72,14 +74,15 @@ export class AuthService {
 
     user.password = await this.encoderService.encodePassword(newPassword);
     user.resetPasswordToken = null;
-    this.usersService.update(user);
+    await this.usersService.update(user);
   }
 
-  async changePassword(changePasswordDto: ChangePasswordDto, user: User) {
+  async changePassword(changePasswordDto: ChangePasswordDto, email: string) {
+    const user = await this.usersService.findOneByEmailWithPassword(email);
     const { oldPassword, newPassword } = changePasswordDto;
     if (await this.encoderService.checkPassword(oldPassword, user.password)) {
       user.password = await this.encoderService.encodePassword(newPassword);
-      this.usersService.update(user);
+      await this.usersService.update(user);
     } else {
       throw new BadRequestException('Old password is incorrect');
     }

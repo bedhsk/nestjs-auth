@@ -12,7 +12,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post('/register')
   register(@Body() createUserDto: CreateUserDto) {
@@ -47,6 +47,6 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
     @GetUser() user: User,
   ) {
-    return this.authService.changePassword(changePasswordDto, user);
+    return this.authService.changePassword(changePasswordDto, user.email);
   }
 }

@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
@@ -14,7 +15,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(
     name: string,
@@ -32,7 +33,7 @@ export class UsersService {
     try {
       await this.usersRepository.save(user);
     } catch (e) {
-      if (e.code === 'ER_DUP_ENTRY') {
+      if (e.code === '23505') {
         throw new ConflictException('This email is already registered');
       }
       throw new InternalServerErrorException();
@@ -51,7 +52,7 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({ email });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     return user;
@@ -64,7 +65,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     return user;

@@ -23,9 +23,12 @@ export class User {
   @Column({ type: 'boolean', default: false })
   isActive: boolean;
 
-  @CreateDateColumn()
+  @Column({ type: 'uuid', default: false, name: 'activation_token' })
+  activationToken: string;
+
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

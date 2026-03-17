@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   IsString,
   IsStrongPassword,
+  IsUUID,
   Length,
 } from 'class-validator';
 
@@ -20,4 +21,9 @@ export class CreateUserDto {
   @IsString()
   // @IsStrongPassword()
   password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUUID('4')
+  activationToken: string;
 }

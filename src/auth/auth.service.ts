@@ -1,10 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { EncoderService } from 'src/auth/encoder.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
+import { v4 } from 'uuid';
 import { LoginDto } from './dto/login.dto';
-import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
+import { ActivateUserDto } from './dto/activate-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +21,13 @@ export class AuthService {
   ) {}
 
   async registerUser(createUserDto: CreateUserDto) {
-    return await this.usersService.create(createUserDto);
+    const { password } = createUserDto;
+    const hashedPasword = await this.encoderService.encodePassword(password);
+    return await this.usersService.create({
+      ...createUserDto,
+      password: hashedPasword,
+      activationToken: v4(),
+    });
   }
 
   async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
@@ -28,5 +40,19 @@ export class AuthService {
       return { accessToken };
     }
     throw new UnauthorizedException('Invalid credentials');
+  }
+
+  async activateUser(activateUserDto: ActivateUserDto) {
+    const { id, code } = activateUserDto;
+    const user = await this.usersService.findOneInactiveByActivationToken(
+      id,
+      code,
+    );
+
+    if (!user) {
+      throw new UnprocessableEntityException('Invalid activation token');
+    }
+
+    await this.usersService.activateUser(user);
   }
 }

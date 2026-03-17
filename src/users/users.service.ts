@@ -8,25 +8,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
-import { EncoderService } from 'src/auth/encoder.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    private readonly encoderService: EncoderService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { name, email, password } = createUserDto;
-
-    const hashedPassword = await this.encoderService.encodePassword(password);
+    const { email } = createUserDto;
 
     const user = this.usersRepository.create({
-      name,
+      ...createUserDto,
       email: email.toLowerCase().trim(),
-      password: hashedPassword,
     });
 
     try {
@@ -70,5 +65,16 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async activateUser(user: User) {
+    user.isActive = true;
+    await this.usersRepository.save(user);
+  }
+
+  async findOneInactiveByActivationToken(id: string, code: string) {
+    return await this.usersRepository.findOne({
+      where: { id, activationToken: code, isActive: false },
+    });  
   }
 }

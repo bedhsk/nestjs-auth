@@ -34,6 +34,9 @@ export class User {
   })
   resetPasswordToken: string | null;
 
+  @Column({ type: 'varchar', length: 100, array: true, default: ['user'] })
+  roles: string[];
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

@@ -25,14 +25,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async registerUser(createUserDto: CreateUserDto) {
-    const { password } = createUserDto;
-    const hashedPasword = await this.encoderService.encodePassword(password);
-    return await this.usersService.create({
-      ...createUserDto,
-      password: hashedPasword,
-      activationToken: v4(),
-    });
+  async registerUser(registerUserDto: CreateUserDto): Promise<void> {
+    const { name, email, password } = registerUserDto;
+    const hashedPassword = await this.encoderService.encodePassword(password);
+    return this.usersService.create(name, email, hashedPassword, v4());
   }
 
   async login(loginDto: LoginDto): Promise<{ accessToken: string }> {

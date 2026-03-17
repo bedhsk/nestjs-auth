@@ -16,25 +16,24 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const { email } = createUserDto;
-
+  async create(
+    name: string,
+    email: string,
+    password: string,
+    activationToken: string,
+  ): Promise<void> {
     const user = this.usersRepository.create({
-      ...createUserDto,
-      email: email.toLowerCase().trim(),
+      name,
+      email,
+      password,
+      activationToken,
     });
 
     try {
-      return await this.usersRepository.save(user);
-    } catch (e: unknown) {
-      if (e instanceof QueryFailedError) {
-        const driverError = e.driverError as {
-          code?: string;
-          detail?: string;
-        };
-        if (driverError.code === '23505') {
-          throw new ConflictException('Email already exists');
-        }
+      await this.usersRepository.save(user);
+    } catch (e) {
+      if (e.code === 'ER_DUP_ENTRY') {
+        throw new ConflictException('This email is already registered');
       }
       throw new InternalServerErrorException();
     }
